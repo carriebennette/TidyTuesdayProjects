@@ -17,9 +17,7 @@ measles <- measles_raw %>%
   mutate(geo_group = case_when(state %in% c("Rhode Island", 
                                             "Arkansas", 
                                             "Pennsylvania") ~ city, 
-                               TRUE ~ county),
-         geo_group = case_when(state == "Illinois" & county == "Cook" ~ city,
-                               TRUE ~ geo_group)) %>%
+                               TRUE ~ county)) %>%
   filter(!is.na(geo_group)) %>% # note: FL is dropped (not county or city data..)
   # we could (probably?) assume that MMR rates ~ overall rates (e.g., for states like Iowa that only report overall rates)
   mutate(mmr_adj = case_when(is.na(mmr) & overall != -1 ~ overall,
@@ -34,10 +32,10 @@ measles <- measles_raw %>%
   filter(name != "West Valley School Prek-6") %>%
   group_by(state) %>%
   # get state averages (for color scale)
-  mutate(state_avg = weighted.mean(mmr_adj, w = enroll, na.rm = T)) %>% 
+  mutate(state_avg = weighted.mean(mmr, w = enroll, na.rm = T)) %>% 
   ungroup() %>%
   group_by(geo_group, state) %>%
-  summarise(mmr_rate = weighted.mean(mmr_adj, w = enroll, na.rm = T),
+  summarise(mmr_rate = weighted.mean(mmr, w = enroll, na.rm = T),
             enroll = sum(enroll, na.rm = T),
             state_avg = mean(state_avg, na.rm = T)) %>%
   mutate(enroll_group = case_when(enroll < 500 ~ 0.1,
